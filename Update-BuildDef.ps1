@@ -34,7 +34,7 @@ function Update-BuildDef
     #Write-Host "BuildDef name=" $buildDefinition.name.ToString()
 
     $UpdateRequired = $false
-
+    
     Write-Host "`n-----------------------------------------------"
     Write-Host "Build def name   : $buildDefName"
     Write-Host "Location         : $TfsCollection\$Tfsproject"
@@ -48,19 +48,41 @@ function Update-BuildDef
             #Write-Host "NuGet restore found!"
             foreach($in in $bld.inputs)
             {
-                #Write-Host "input=" $in.name.ToString()
-                if(($in.name.ToString().ToLower().Contains("nugetversion")) -and  ($in.value.ToString() -ne "4.0.0.2283")) 
+                foreach($tsk in $bld.task)
                 {
-                    Write-Host "`nnugetversion needs attention! Current version=:" $in.value.ToString()-ForegroundColor Yellow
-                    Write-Host "nugetversion should be : 4.0.0.2283" -ForegroundColor Yellow
-                    $in.value = "'4.0.0.2283'"
-                    Write-Host "nugetversion will be updated to 4.0.0.2283" -ForegroundColor Cyan
-                    $NuGetVersionFound = $true
+                    if(($tsk.name.ToString().ToLower() -eq "versionspec") -and ($tsk.value.ToString().ToLower() -ne "0.*"))
+                    {
+                        Write-Host "NuGet versionSpec needs attention!" -ForegroundColor Yellow
+                        Write-Host "Current values are: "
+                        Write-Host "Displayname  : " $tsk.name
+                        Write-Host "Value        : " $tsk.value.ToString()
+                        $tsk.value = "'0.*'"
+                        Write-Host "versionSpec will be updated to '0.*'" -ForegroundColor Cyan
+                    }
+                }
+
+                if(($in.name.ToString().ToLower().Contains("nugetversion")))
+                {
+                    if(($in.value.ToString() -eq "4.0.0.2283"))
+                    {
+                        Write-Host "NuGet version (4.0.0.2283) found and OK!" -ForegroundColor Green
+                        $NuGetVersionFound = $true
+                    }
+                    else 
+                    {
+                        Write-Host "`nnugetversion needs attention! Current version=:" $in.value.ToString()-ForegroundColor Yellow
+                        Write-Host "nugetversion should be : 4.0.0.2283" -ForegroundColor Yellow
+                        $in.value = "'4.0.0.2283'"
+                        Write-Host "nugetversion will be updated to 4.0.0.2283" -ForegroundColor Cyan
+                        $NuGetVersionFound = $true        
+                    }
                 }
             }
             if ($NuGetVersionFound -eq $false)
             {
-                Write-Host "No NuGet version info found! Needs manual interaction" -ForegroundColor Red
+                Write-Host "No NuGet version property was NOT found!" -ForegroundColor Red
+                Write-Host "Version prop will now be inserted and set to '4.0.0.2283'" -ForegroundColor Cyan
+                $bld.inputs.Add("nuGetVersion", "'4.0.0.2283'");
             }
         }
 
@@ -111,8 +133,7 @@ function Update-BuildDef
         }
     }
     
-    <#
-    #Here follows the commit section...
+    #     #Here follows the commit section...
     $serialized = [Newtonsoft.Json.JsonConvert]::SerializeObject($buildDefinition)
     $postData = [System.Text.Encoding]::UTF8.GetBytes($serialized)
     # The TFS2015 REST endpoint requires an api-version header, otherwise it refuses to work properly.
@@ -120,7 +141,6 @@ function Update-BuildDef
     $response = Invoke-WebRequest -UseDefaultCredentials -Uri $buildDefUrl -Headers $headers `
                 -Method Put -Body $postData -ContentType "application/json"
     Write-Host "result code=" $response.StatusDescription
-    #>
 }
 
 #Update-BuildDef

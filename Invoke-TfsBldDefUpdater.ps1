@@ -19,18 +19,8 @@ function Invoke-TfsBldDefUpdater
         [string]$TfsCollection
     )
 
-    #Write-Host "`nStarting build definition update for:"
-    #Write-Host "TfsCollection : $TfsCollection"
-    #.(Join-Path $($MyInvocation.MyCommand.Path) "Get-TfsProjects.ps1")  #work
-    #."D:\Dev\github\TfsBuildUpdater\release\Get-TfsBuildDefinitions.ps1" #work
-    #."D:\Dev\github\TfsBuildUpdater\release\Update-BuildDef.ps1" #work
-    #."D:\Dev\PowerShell\Tfs-BuildDefinitions\TfsBuildDefUpdater\Invoke-TfsBldDefUpdater.ps1"
-    ."D:\Dev\PowerShell\Tfs-BuildDefinitions\TfsBuildDefUpdater\Update-BuildDef.ps1"
-    ."D:\Dev\PowerShell\Tfs-BuildDefinitions\TfsBuildDefUpdater\Get-TfsProjects.ps1"
-
-    #."C:\dev\PowerShell\Tfs-BuildDefinitions\TfsBuildUpdater\release\Get-TfsProjects.ps1"  #T800
-    #."C:\dev\PowerShell\Tfs-BuildDefinitions\TfsBuildUpdater\release\Get-TfsBuildDefinitions.ps1" #T800
-    #."C:\dev\PowerShell\Tfs-BuildDefinitions\TfsBuildUpdater\release\Update-BuildDef.ps1" #T800
+    ."D:\Dev\github\PSTfsBldDefUpdater\Update-BuildDef.ps1"
+    ."D:\Dev\github\PSTfsBldDefUpdater\Get-TfsProjects.ps1"
 
     #$Script:base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f "T800\morne","en55denwlgpdxw2t4bwkdq6apfbugspjaxbhjhrxvymex5tqb2aa")))
 
