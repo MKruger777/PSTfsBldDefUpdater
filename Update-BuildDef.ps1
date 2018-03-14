@@ -46,29 +46,29 @@ function Update-BuildDef
     }
     else
     {
-        #Start artifactory credential
-        foreach($var in $buildDefinition.variables)
-        {
-            if($var.name.ToString().ToLower().Contains("tfsbuilduserartifactory")) #  -and $var.name.ToString().ToLower().Contains("tfsbuildpasswordartifactory")) 
-             {
-                Write-Host "Artifactory credential found!" -ForegroundColor Yellow
-                $ArtifactoryCredExists = $true
-             }
-        }        
+        #Start artifactory credential - this should require intervention anymore
+        # foreach($var in $buildDefinition.variables)
+        # {
+        #     if($var.name.ToString().ToLower().Contains("tfsbuilduserartifactory")) #  -and $var.name.ToString().ToLower().Contains("tfsbuildpasswordartifactory")) 
+        #      {
+        #         Write-Host "Artifactory credential found!" -ForegroundColor Yellow
+        #         $ArtifactoryCredExists = $true
+        #      }
+        # }        
 
-        if($ArtifactoryCredExists -eq $false)
-        {
-            $buildDefinition.variables.Add("TFSBuildUserArtifactory", "'tfsbuild'");
-            $buildDefinition.variables.Add("TFSBuildPasswordArtifactory", "'tfsbuild'");
-            Write-Host "No Artifactory credential found! Will be created" -ForegroundColor Yellow
-        }
+        # if($ArtifactoryCredExists -eq $false)
+        # {
+        #     $buildDefinition.variables.Add("TFSBuildUserArtifactory", "'tfsbuild'");
+        #     $buildDefinition.variables.Add("TFSBuildPasswordArtifactory", "'tfsbuild'");
+        #     Write-Host "No Artifactory credential found! Will be created" -ForegroundColor Yellow
+        # }
         #End artifactory credential
 
         foreach($bld in  $buildDefinition.build)
         {
             Write-Host "`nBuild task name=" $bld.displayName.ToString()
             
-            # Visual Studio targeting 2015 to 2017 - await decition from Peter
+            # Visual Studio targeting 2015 to 2017 - confirmed with Bart that this will be left in tact
             # if($bld.displayName.ToString().ToLower().Contains("build solution"))
             # {
             #     Write-Host "At build step"
@@ -92,6 +92,14 @@ function Update-BuildDef
             #     }
             # }
 
+            # Sonar snoop
+            if($bld.displayName.ToString().ToLower().Contains("sonarqube"))
+            {
+                Write-Host "SonarQube found!!" -ForegroundColor Yellow
+                Write-Host "enabled = " $bld.enabled.toString()  -ForegroundColor Yellow
+            }
+
+            # nuget snoop
             if($bld.displayName.ToString().ToLower().Contains("nuget restore"))
             {
                 $NuGetVersionFound = $false            
@@ -136,7 +144,7 @@ function Update-BuildDef
                 }
             }
 
-            #now check the Vstest versions stuff
+            # Vstest snoop
             if($bld.displayName.ToString().ToLower().Contains("test assemblies"))
             {
                 foreach($in in $bld.inputs)
@@ -166,7 +174,7 @@ function Update-BuildDef
                 }
             }
 
-            #now check the Vstest versions stuff
+            # NPM - snoop
             if($bld.displayName.ToString().ToLower().Contains("npm"))
             {
                 foreach($in in $bld.inputs)
@@ -184,12 +192,12 @@ function Update-BuildDef
         }
         
         #     #Here follows the commit section...
-        $serialized = [Newtonsoft.Json.JsonConvert]::SerializeObject($buildDefinition)
-        $postData = [System.Text.Encoding]::UTF8.GetBytes($serialized)
-        # The TFS2015 REST endpoint requires an api-version header, otherwise it refuses to work properly.
-        $headers = @{ "Accept" = "api-version=2.3-preview.2" }
-        $response = Invoke-WebRequest -UseDefaultCredentials -Uri $buildDefUrl -Headers $headers `
-                    -Method Put -Body $postData -ContentType "application/json"
-        Write-Host "result code=" $response.StatusDescription
+        # $serialized = [Newtonsoft.Json.JsonConvert]::SerializeObject($buildDefinition)
+        # $postData = [System.Text.Encoding]::UTF8.GetBytes($serialized)
+        # # The TFS2015 REST endpoint requires an api-version header, otherwise it refuses to work properly.
+        # $headers = @{ "Accept" = "api-version=2.3-preview.2" }
+        # $response = Invoke-WebRequest -UseDefaultCredentials -Uri $buildDefUrl -Headers $headers `
+        #             -Method Put -Body $postData -ContentType "application/json"
+        # Write-Host "result code=" $response.StatusDescription
     }
 }
