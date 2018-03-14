@@ -22,8 +22,6 @@ function Invoke-TfsBldDefUpdater
     #load dependant scripts
     $ParentScript = $MyInvocation.MyCommand.Name
     Get-ChildItem ($PSScriptRoot) | Where { ($_.Name -like '*.ps1') -and ($_.Name -ne "$ParentScript.ps1" ) } | ForEach { . $_.FullName }
-    #."D:\Dev\github\PSTfsBldDefUpdater\Update-BuildDef.ps1"
-    #."D:\Dev\github\PSTfsBldDefUpdater\Get-TfsProjects.ps1"
 
     #$Script:base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f "T800\morne","en55denwlgpdxw2t4bwkdq6apfbugspjaxbhjhrxvymex5tqb2aa")))
 
@@ -76,5 +74,5 @@ function Invoke-TfsProjBldDefUpdate
     }
 }
 
-Invoke-TfsBldDefUpdater -TfsUri "http://xapptfs17.otas.nv:8080/tfs" -TfsCollection 'Binck'
+Invoke-TfsBldDefUpdater -TfsUri "http://papptfs17.binckbank.nv:8080/tfs" -TfsCollection 'Binck'
 #Invoke-TfsBldDefUpdater -TfsUri "http://t800:8080/tfs" -TfsCollection 'DefaultCollection'

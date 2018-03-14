@@ -26,12 +26,15 @@ function Update-BuildDef
     )
     
     $response = Invoke-WebRequest $buildDefUrl -UseDefaultCredentials
-
-    # This assumes the working directory is the location of the assembly:
-    #[void][System.Reflection.Assembly]::LoadFile("C:\dev\PowerShell\Tfs-BuildDefinitions\TfsBuildUpdater\newtonsoft.json.11.0.1\lib\net45\Newtonsoft.Json.dll") #T800
-    [void][System.Reflection.Assembly]::LoadFile("D:\Dev\github\TfsBuildUpdater\release\newtonsoft.json.11.0.1\lib\net45\Newtonsoft.Json.dll") #work
+    <#
+        Note that the following 2 files should exits in the directory where the script is executing from!
+        #Newtonsoft.Json.xml
+        #Newtonsoft.Json.dll
+    #>
+    $JsonPath = Join-Path -Path $PSScriptRoot -ChildPath "Newtonsoft.Json.dll"
+    [void][System.Reflection.Assembly]::LoadFile($JsonPath)
     $buildDefinition = [Newtonsoft.Json.JsonConvert]::DeserializeObject($response.Content)
-    #Write-Host "BuildDef name=" $buildDefinition.name.ToString()
+    Write-Host "BuildDef name=" $buildDefinition.name.ToString()
 
     $UpdateRequired = $false
     $ArtifactoryCredExists = $false
@@ -42,7 +45,7 @@ function Update-BuildDef
     
     if($buildDefinition.type.ToString().ToLower() -eq 'xaml')
     {
-        Write-Host "XAML build are no longer supported in Tfs2018! This build definition will be ignored - please investigate." -ForegroundColor Red
+        Write-Host "XAML build definitions are no longer supported in Tfs2018! This build definition will be ignored - please investigate." -ForegroundColor Red
     }
     else
     {
@@ -66,7 +69,7 @@ function Update-BuildDef
 
         foreach($bld in  $buildDefinition.build)
         {
-            Write-Host "`nBuild task name=" $bld.displayName.ToString()
+            #Write-Host "`nBuild task name=" $bld.displayName.ToString()
             
             # Visual Studio targeting 2015 to 2017 - confirmed with Bart that this will be left in tact
             # if($bld.displayName.ToString().ToLower().Contains("build solution"))
@@ -93,11 +96,11 @@ function Update-BuildDef
             # }
 
             # Sonar snoop
-            if($bld.displayName.ToString().ToLower().Contains("sonarqube"))
-            {
-                Write-Host "SonarQube found!!" -ForegroundColor Yellow
-                Write-Host "enabled = " $bld.enabled.toString()  -ForegroundColor Yellow
-            }
+            # if($bld.displayName.ToString().ToLower().Contains("sonarqube"))
+            # {
+            #     Write-Host "SonarQube found!!" -ForegroundColor Yellow
+            #     Write-Host "enabled = " $bld.enabled.toString()  -ForegroundColor Yellow
+            # }
 
             # nuget snoop
             if($bld.displayName.ToString().ToLower().Contains("nuget restore"))
@@ -138,7 +141,7 @@ function Update-BuildDef
                 }
                 if ($NuGetVersionFound -eq $false)
                 {
-                    Write-Host "No NuGet version property was NOT found!" -ForegroundColor Red
+                    Write-Host "`nNo NuGet version property was NOT found!" -ForegroundColor Red
                     Write-Host "Version prop will now be inserted and set to '4.0.0.2283'" -ForegroundColor Cyan
                     $bld.inputs.Add("nuGetVersion", "'4.0.0.2283'");
                 }
