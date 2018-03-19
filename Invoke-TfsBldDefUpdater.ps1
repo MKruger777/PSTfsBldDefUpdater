@@ -3,8 +3,7 @@ function Invoke-TfsBldDefUpdater
 {
         <#
         .SYNOPSIS
-        As part of certain release activities, it is nessasary to retrieve a set of Tfs work items.
-        This function will retrieve the set on basis of the WIQL query passed to it.
+        This version will traget the Topline BuildDefinitions as the solotion is known here.
 
         .PARAMETER WiqlQuery
         This is the query that will determine the workitems selected and returned to the caller.
