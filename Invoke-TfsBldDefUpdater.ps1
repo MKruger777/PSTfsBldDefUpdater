@@ -37,7 +37,11 @@ function Invoke-TfsBldDefUpdater
         Write-Host "`n$TfsCollection collecion projects are:" 
         foreach($TfsProj in $TfsProjects.value)
         {
-            Invoke-TfsProjBldDefUpdate -TfsUri $TfsUri -TfsCollection $TfsCollection -TfsProject $TfsProj.name
+            if ($TfsProj.name.ToString().ToLower() -eq "topline") 
+            {
+                Write-Host "Topline project found! It will now be updated..." -ForegroundColor Blue    
+                Invoke-TfsProjBldDefUpdate -TfsUri $TfsUri -TfsCollection $TfsCollection -TfsProject $TfsProj.name
+            }
         }
     }
 }
@@ -67,7 +71,7 @@ function Invoke-TfsProjBldDefUpdate
         foreach($TfsProjBldDef in $TfsProjBldDefs.value)
         {
             $TfsBldDefUrl = "$TfsUri/$TfsCollection/$Tfsproject/_apis/build/definitions/$($TfsProjBldDef.ID)?api-version=2.0"
-            Write-Host $TfsBldDefUrl
+            #Write-Host $TfsBldDefUrl
             Update-BuildDef -buildDefUrl $TfsBldDefUrl -TfsCollection $TfsCollection -TfsProject $TfsProj.name -buildDefName $TfsProjBldDef.Name
         }
     }

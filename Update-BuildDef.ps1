@@ -1,4 +1,4 @@
-function Update-BuildDef
+function Update-BuildDef 
 {
     <#
     .SYNOPSIS
@@ -34,173 +34,72 @@ function Update-BuildDef
     $JsonPath = Join-Path -Path $PSScriptRoot -ChildPath "Newtonsoft.Json.dll"
     [void][System.Reflection.Assembly]::LoadFile($JsonPath)
     $buildDefinition = [Newtonsoft.Json.JsonConvert]::DeserializeObject($response.Content)
-    Write-Host "BuildDef name=" $buildDefinition.name.ToString()
+    #Write-Host "BuildDef name=" $buildDefinition.name.ToString()
 
-    $UpdateRequired = $false
-    $ArtifactoryCredExists = $false
+    $SearchFolderVal = '''$(Build.SourcesDirectory)\\$(ProjectFolder)'''
+    $SearchFolderPropExist = $false
     
     Write-Host "`n-----------------------------------------------"
     Write-Host "Build def name   : $buildDefName"
     Write-Host "Location         : $TfsCollection\$Tfsproject"
     
-    if($buildDefinition.type.ToString().ToLower() -eq 'xaml')
+    if ($buildDefinition.type.ToString().ToLower() -eq 'xaml') 
     {
         Write-Host "XAML build definitions are no longer supported in Tfs2018! This build definition will be ignored - please investigate." -ForegroundColor Red
     }
-    else
+    else 
     {
-        #Start artifactory credential - this should require intervention anymore
-        # foreach($var in $buildDefinition.variables)
-        # {
-        #     if($var.name.ToString().ToLower().Contains("tfsbuilduserartifactory")) #  -and $var.name.ToString().ToLower().Contains("tfsbuildpasswordartifactory")) 
-        #      {
-        #         Write-Host "Artifactory credential found!" -ForegroundColor Yellow
-        #         $ArtifactoryCredExists = $true
-        #      }
-        # }        
-
-        # if($ArtifactoryCredExists -eq $false)
-        # {
-        #     $buildDefinition.variables.Add("TFSBuildUserArtifactory", "'tfsbuild'");
-        #     $buildDefinition.variables.Add("TFSBuildPasswordArtifactory", "'tfsbuild'");
-        #     Write-Host "No Artifactory credential found! Will be created" -ForegroundColor Yellow
-        # }
-        #End artifactory credential
-
-        foreach($bld in  $buildDefinition.build)
+        foreach ($bld in  $buildDefinition.build) 
         {
-            #Write-Host "`nBuild task name=" $bld.displayName.ToString()
-            
-            # Visual Studio targeting 2015 to 2017 - confirmed with Bart that this will be left in tact
-            # if($bld.displayName.ToString().ToLower().Contains("build solution"))
-            # {
-            #     Write-Host "At build step"
-            #     foreach($in in $bld.inputs)
-            #     {
-            #         if(($in.name.ToString().ToLower() -eq "vsversion"))
-            #         {
-            #              if($in.value.ToString().ToLower() -eq "17.0")
-            #              {
-            #                 Write-Host "Visual Studio version OK" -ForegroundColor Green
-            #              }
-            #              else 
-            #              {
-            #                 Write-Host "`nVisual Studio version needs attention!" -ForegroundColor Yellow      
-            #                 Write-Host "Current values are: "
-            #                 Write-Host "vsVersion = "$in.value.ToString()
-            #                 $in.value = "'17.0'"
-            #                 Write-Host "Visual Studio version updated to 17.0" -ForegroundColor Cyan
-            #              }
-            #         }
-            #     }
-            # }
-
-            # Sonar snoop
-            # if($bld.displayName.ToString().ToLower().Contains("sonarqube"))
-            # {
-            #     Write-Host "SonarQube found!!" -ForegroundColor Yellow
-            #     Write-Host "enabled = " $bld.enabled.toString()  -ForegroundColor Yellow
-            # }
-
-            # nuget snoop
-            if($bld.displayName.ToString().ToLower().Contains("nuget restore"))
+            if ($bld.displayName.ToString().ToLower().Contains("test assemblies")) 
             {
-                $NuGetVersionFound = $false            
-                #Write-Host "NuGet restore found!"
-                foreach($in in $bld.inputs)
-                {
-                    foreach($tsk in $bld.task)
-                    {
-                        if(($tsk.name.ToString().ToLower() -eq "versionspec") -and ($tsk.value.ToString().ToLower() -ne "0.*"))
-                        {
-                            Write-Host "NuGet versionSpec needs attention!" -ForegroundColor Yellow
-                            Write-Host "Current values are: "
-                            Write-Host "Displayname  : " $tsk.name
-                            Write-Host "Value        : " $tsk.value.ToString()
-                            $tsk.value = "'0.*'"
-                            Write-Host "versionSpec will be updated to '0.*'" -ForegroundColor Cyan
-                        }
-                    }
+                Write-Host "Display name : "$bld.displayName.ToString()
+                $bld.displayName = "Test Assemblies"
+                $SearchFolderPropExist = SearchPathExists $bld
 
-                    if(($in.name.ToString().ToLower().Contains("nugetversion")))
+                if($SearchFolderPropExist -eq $true)
+                {
+                    foreach ($in in $bld.inputs) 
                     {
-                        if(($in.value.ToString() -eq "4.0.0.2283"))
+                        #locate the input var searchFolder and update it
+                        if (($in.name.ToString().ToLower() -contains "searchfolder")) 
                         {
-                            Write-Host "NuGet version (4.0.0.2283) found and OK!" -ForegroundColor Green
-                            $NuGetVersionFound = $true
-                        }
-                        else 
-                        {
-                            Write-Host "`nnugetversion needs attention! Current version=:" $in.value.ToString()-ForegroundColor Yellow
-                            Write-Host "nugetversion should be : 4.0.0.2283" -ForegroundColor Yellow
-                            $in.value = "'4.0.0.2283'"
-                            Write-Host "nugetversion will be updated to 4.0.0.2283" -ForegroundColor Cyan
-                            $NuGetVersionFound = $true        
+                            Write-Host "search path found! It will now be updated ..." -ForegroundColor Yellow
+                            $in.value = $SearchFolderVal
                         }
                     }
                 }
-                if ($NuGetVersionFound -eq $false)
+                else 
                 {
-                    Write-Host "`nNo NuGet version property was NOT found!" -ForegroundColor Red
-                    Write-Host "Version prop will now be inserted and set to '4.0.0.2283'" -ForegroundColor Cyan
-                    $bld.inputs.Add("nuGetVersion", "'4.0.0.2283'");
-                }
-            }
-
-            # Vstest snoop
-            if($bld.displayName.ToString().ToLower().Contains("test assemblies"))
-            {
-                foreach($in in $bld.inputs)
-                {
-                    if(($in.name.ToString().ToLower() -eq "vstestversion") -and ($in.value.ToString().ToLower() -ne "latest"))
-                    {
-                        Write-Host "`nVsTest settings needs attention! Should be vsTestVersion = latest" -ForegroundColor Yellow      
-                        Write-Host "Current values are: "
-                        Write-Host "Displayname : " $in.name
-                        Write-Host "Value       : " $in.value.ToString()
-                        $in.value = "'latest'"
-                        Write-Host "VsTest version will be updated to 'latest'" -ForegroundColor Cyan
-                    }
-                }
-
-                foreach($tsk in $bld.task)
-                {
-                    if(($tsk.name.ToString().ToLower() -eq "versionspec") -and ($tsk.value.ToString().ToLower() -ne "2.*"))
-                    {
-                        Write-Host "`nVsTest settings needs attention! Should be VersionSpec 2.*" -ForegroundColor Yellow      
-                        Write-Host "Current values are: "
-                        Write-Host "Displayname  : " $tsk.name
-                        Write-Host "Value        : " $tsk.value.ToString()
-                        $tsk.value = "'2.*'"
-                        Write-Host "versionSpec will be updated to '2.*'" -ForegroundColor Cyan
-                    }
-                }
-            }
-
-            # NPM - snoop
-            if($bld.displayName.ToString().ToLower().Contains("npm"))
-            {
-                foreach($in in $bld.inputs)
-                {
-                    if(($in.name.ToString().ToLower() -eq "command") -and ($in.value.ToString().ToLower() -eq "run extract"))
-                    {
-                        Write-Host "`nNpm settings needs attention! Please investigate." -ForegroundColor Yellow      
-                        Write-Host "Current values are: "
-                        Write-Host "Command     : " $in.name.ToString()
-                        Write-Host "Value       : " $in.value.ToString()
-                        Write-Host "Value NOT updated!" -ForegroundColor Cyan
-                    }
+                    #the input var searchFolder does not exist and will be inserted
+                    Write-Host "Search path filter NOT found! It will be inserted now ..." -ForegroundColor Red
+                    $bld.inputs.Add("searchFolder", $SearchFolderVal);
                 }
             }
         }
         
         #     #Here follows the commit section...
-        # $serialized = [Newtonsoft.Json.JsonConvert]::SerializeObject($buildDefinition)
-        # $postData = [System.Text.Encoding]::UTF8.GetBytes($serialized)
-        # # The TFS2015 REST endpoint requires an api-version header, otherwise it refuses to work properly.
-        # $headers = @{ "Accept" = "api-version=2.3-preview.2" }
-        # $response = Invoke-WebRequest -UseDefaultCredentials -Uri $buildDefUrl -Headers $headers `
-        #             -Method Put -Body $postData -ContentType "application/json"
-        # Write-Host "result code=" $response.StatusDescription
+        $serialized = [Newtonsoft.Json.JsonConvert]::SerializeObject($buildDefinition)
+        $postData = [System.Text.Encoding]::UTF8.GetBytes($serialized)
+        # The TFS2015 REST endpoint requires an api-version header, otherwise it refuses to work properly.
+        $headers = @{ "Accept" = "api-version=2.3-preview.2" }
+        $response = Invoke-WebRequest -UseDefaultCredentials -Uri $buildDefUrl -Headers $headers `
+                    -Method Put -Body $postData -ContentType "application/json"
+        Write-Host "result code=" $response.StatusDescription
     }
+}
+
+function SearchPathExists($bld) 
+{
+    $exists = $false
+    foreach ($in in $bld.inputs) 
+    {
+        if (($in.name.ToString().ToLower() -contains "searchfolder")) 
+        {
+            #Write-Host "search path found!"
+            $exists = $true
+            break
+        }
+    }
+    return $exists     
 }
