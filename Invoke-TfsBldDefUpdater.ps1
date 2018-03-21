@@ -3,14 +3,16 @@ function Invoke-TfsBldDefUpdater
 {
         <#
         .SYNOPSIS
-        As part of certain release activities, it is nessasary to retrieve a set of Tfs work items.
-        This function will retrieve the set on basis of the WIQL query passed to it.
+        Script to modify ToplineGit.
 
-        .PARAMETER WiqlQuery
-        This is the query that will determine the workitems selected and returned to the caller.
+        .PARAMETER TfsUri
+        Tfs Uri - looks like this "http://papptfs17.binckbank.nv:8080/tfs"
+
+        .PARAMETER TfsCollection
+        Tfs collection 
 
         .EXAMPLE
-        Get-TfsWorkItems "SELECT System.ID, System.Title from workitems"
+        Invoke-TfsBldDefUpdater -TfsUri "http://papptfs17.binckbank.nv:8080/tfs" -TfsCollection 'Binck'
     #>
     param(
         [Parameter(Mandatory)]
