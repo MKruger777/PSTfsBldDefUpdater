@@ -34,7 +34,6 @@ function Update-BuildDef
     $JsonPath = Join-Path -Path $PSScriptRoot -ChildPath "Newtonsoft.Json.dll"
     [void][System.Reflection.Assembly]::LoadFile($JsonPath)
     $buildDefinition = [Newtonsoft.Json.JsonConvert]::DeserializeObject($response.Content)
-    #Write-Host "BuildDef name=" $buildDefinition.name.ToString()
 
     $SearchFolderVal = '''$(Build.SourcesDirectory)\\$(ProjectFolder)'''
     $SearchFolderPropExist = $false
@@ -51,6 +50,7 @@ function Update-BuildDef
     {
         foreach ($bld in  $buildDefinition.build) 
         {
+            #VS-Test changes
             if ($bld.displayName.ToString().ToLower().Contains("test assemblies")) 
             {
                 Write-Host "Display name : "$bld.displayName.ToString()
@@ -76,9 +76,56 @@ function Update-BuildDef
                     $bld.inputs.Add("searchFolder", $SearchFolderVal);
                 }
             }
+            #end VS-Test changes
+
+            # nuget snoop
+            if($bld.displayName.ToString().ToLower().Contains("nuget restore"))
+            {
+                $NuGetVersionFound = $false            
+                #Write-Host "NuGet restore found!"
+                foreach($in in $bld.inputs)
+                {
+                    foreach($tsk in $bld.task)
+                    {
+                        if(($tsk.name.ToString().ToLower() -eq "versionspec") -and ($tsk.value.ToString().ToLower() -ne "0.*"))
+                        {
+                            Write-Host "NuGet versionSpec needs attention!" -ForegroundColor Yellow
+                            Write-Host "Current values are: "
+                            Write-Host "Displayname  : " $tsk.name
+                            Write-Host "Value        : " $tsk.value.ToString()
+                            $tsk.value = "'0.*'"
+                            Write-Host "versionSpec will be updated to '0.*'" -ForegroundColor Cyan
+                        }
+                    }
+
+                    if(($in.name.ToString().ToLower().Contains("nugetversion")))
+                    {
+                        if(($in.value.ToString() -eq "4.0.0.2283"))
+                        {
+                            Write-Host "NuGet version (4.0.0.2283) found and OK!" -ForegroundColor Green
+                            $NuGetVersionFound = $true
+                        }
+                        else 
+                        {
+                            Write-Host "`nnugetversion needs attention! Current version=:" $in.value.ToString()-ForegroundColor Yellow
+                            Write-Host "nugetversion should be : 4.0.0.2283" -ForegroundColor Yellow
+                            $in.value = "'4.0.0.2283'"
+                            Write-Host "nugetversion will be updated to 4.0.0.2283" -ForegroundColor Cyan
+                            $NuGetVersionFound = $true        
+                        }
+                    }
+                }
+                if ($NuGetVersionFound -eq $false)
+                {
+                    Write-Host "No NuGet version property was NOT found!" -ForegroundColor Red
+                    Write-Host "Version prop will now be inserted and set to '4.0.0.2283'" -ForegroundColor Cyan
+                    $bld.inputs.Add("nuGetVersion", "'4.0.0.2283'");
+                }
+            }
+            #end NuGet section
         }
         
-        #     #Here follows the commit section...
+        #Here follows the commit section...
         $serialized = [Newtonsoft.Json.JsonConvert]::SerializeObject($buildDefinition)
         $postData = [System.Text.Encoding]::UTF8.GetBytes($serialized)
         # The TFS2015 REST endpoint requires an api-version header, otherwise it refuses to work properly.
