@@ -148,34 +148,35 @@ function Update-BuildDef
             }
 
             # Vstest snoop
-            if($bld.displayName.ToString().ToLower().Contains("test assemblies"))
-            {
-                foreach($in in $bld.inputs)
-                {
-                    if(($in.name.ToString().ToLower() -eq "vstestversion") -and ($in.value.ToString().ToLower() -ne "latest"))
-                    {
-                        Write-Host "`nVsTest settings needs attention! Should be vsTestVersion = latest" -ForegroundColor Yellow      
-                        Write-Host "Current values are: "
-                        Write-Host "Displayname : " $in.name
-                        Write-Host "Value       : " $in.value.ToString()
-                        $in.value = "'latest'"
-                        Write-Host "VsTest version will be updated to 'latest'" -ForegroundColor Cyan
-                    }
-                }
+            # if($bld.displayName.ToString().ToLower().Contains("test assemblies"))
+            # {
+            #     foreach($in in $bld.inputs)
+            #     {
+            #         if(($in.name.ToString().ToLower() -eq "vstestversion") -and ($in.value.ToString().ToLower() -ne "latest"))
+            #         {
+            #             Write-Host "`nVsTest settings needs attention! Should be vsTestVersion = latest" -ForegroundColor Yellow      
+            #             Write-Host "Current values are: "
+            #             Write-Host "Displayname : " $in.name
+            #             Write-Host "Value       : " $in.value.ToString()
+            #             $in.value = "'latest'"
+            #             Write-Host "VsTest version will be updated to 'latest'" -ForegroundColor Cyan
+            #         }
+            #     }
 
-                foreach($tsk in $bld.task)
-                {
-                    if(($tsk.name.ToString().ToLower() -eq "versionspec") -and ($tsk.value.ToString().ToLower() -ne "2.*"))
-                    {
-                        Write-Host "`nVsTest settings needs attention! Should be VersionSpec 2.*" -ForegroundColor Yellow      
-                        Write-Host "Current values are: "
-                        Write-Host "Displayname  : " $tsk.name
-                        Write-Host "Value        : " $tsk.value.ToString()
-                        $tsk.value = "'2.*'"
-                        Write-Host "versionSpec will be updated to '2.*'" -ForegroundColor Cyan
-                    }
-                }
-            }
+            #     foreach($tsk in $bld.task)
+            #     {
+            #         if(($tsk.name.ToString().ToLower() -eq "versionspec") -and ($tsk.value.ToString().ToLower() -ne "2.*"))
+            #         {
+            #             Write-Host "`nVsTest settings needs attention! Should be VersionSpec 2.*" -ForegroundColor Yellow      
+            #             Write-Host "Current values are: "
+            #             Write-Host "Displayname  : " $tsk.name
+            #             Write-Host "Value        : " $tsk.value.ToString()
+            #             $tsk.value = "'2.*'"
+            #             Write-Host "versionSpec will be updated to '2.*'" -ForegroundColor Cyan
+            #         }
+            #     }
+            # }
+            #end vstest
 
             # NPM - snoop
             if($bld.displayName.ToString().ToLower().Contains("npm"))
@@ -197,7 +198,7 @@ function Update-BuildDef
         #     #Here follows the commit section...
         # $serialized = [Newtonsoft.Json.JsonConvert]::SerializeObject($buildDefinition)
         # $postData = [System.Text.Encoding]::UTF8.GetBytes($serialized)
-        # # The TFS2015 REST endpoint requires an api-version header, otherwise it refuses to work properly.
+        # The TFS2015 REST endpoint requires an api-version header, otherwise it refuses to work properly.
         # $headers = @{ "Accept" = "api-version=2.3-preview.2" }
         # $response = Invoke-WebRequest -UseDefaultCredentials -Uri $buildDefUrl -Headers $headers `
         #             -Method Put -Body $postData -ContentType "application/json"

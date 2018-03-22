@@ -4,6 +4,8 @@ function Invoke-TfsBldDefUpdater
         <#
         .SYNOPSIS
         Script to modify ToplineGit.
+        Work that needs to be done:
+        NuGet
 
         .PARAMETER TfsUri
         Tfs Uri - looks like this "http://papptfs17.binckbank.nv:8080/tfs"
@@ -40,7 +42,11 @@ function Invoke-TfsBldDefUpdater
         Write-Host "`n$TfsCollection collecion projects are:" 
         foreach($TfsProj in $TfsProjects.value)
         {
-            Invoke-TfsProjBldDefUpdate -TfsUri $TfsUri -TfsCollection $TfsCollection -TfsProject $TfsProj.name
+            if ($TfsProj.name.ToString().ToLower() -eq "toplinegit") 
+            {
+                Write-Host "ToplineGit project found! It will now be updated..." -ForegroundColor Yellow
+                Invoke-TfsProjBldDefUpdate -TfsUri $TfsUri -TfsCollection $TfsCollection -TfsProject $TfsProj.name
+            }
         }
     }
 }
