@@ -42,7 +42,7 @@ function Invoke-TfsBldDefUpdater
         Write-Host "`n$TfsCollection collecion projects are:" 
         foreach($TfsProj in $TfsProjects.value)
         {
-            if ($TfsProj.name.ToString().ToLower() -eq "toplinegit") 
+            if ($TfsProj.name.ToString().ToLower() -eq "fintegratorps") 
             {
                 Write-Host "ToplineGit project found! It will now be updated..." -ForegroundColor Yellow
                 Invoke-TfsProjBldDefUpdate -TfsUri $TfsUri -TfsCollection $TfsCollection -TfsProject $TfsProj.name
