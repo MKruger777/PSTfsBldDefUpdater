@@ -34,8 +34,7 @@ function Update-BuildDef
     $JsonPath = Join-Path -Path $PSScriptRoot -ChildPath "Newtonsoft.Json.dll"
     [void][System.Reflection.Assembly]::LoadFile($JsonPath)
     $buildDefinition = [Newtonsoft.Json.JsonConvert]::DeserializeObject($response.Content)
-    Write-Host "BuildDef name=" $buildDefinition.name.ToString()
-
+    
     $UpdateRequired = $false
     $ArtifactoryCredExists = $false
     
@@ -148,50 +147,51 @@ function Update-BuildDef
             }
 
             # Vstest snoop
-            if($bld.displayName.ToString().ToLower().Contains("test assemblies"))
-            {
-                foreach($in in $bld.inputs)
-                {
-                    if(($in.name.ToString().ToLower() -eq "vstestversion") -and ($in.value.ToString().ToLower() -ne "latest"))
-                    {
-                        Write-Host "`nVsTest settings needs attention! Should be vsTestVersion = latest" -ForegroundColor Yellow      
-                        Write-Host "Current values are: "
-                        Write-Host "Displayname : " $in.name
-                        Write-Host "Value       : " $in.value.ToString()
-                        $in.value = "'latest'"
-                        Write-Host "VsTest version will be updated to 'latest'" -ForegroundColor Cyan
-                    }
-                }
+            # if($bld.displayName.ToString().ToLower().Contains("test assemblies"))
+            # {
+            #     foreach($in in $bld.inputs)
+            #     {
+            #         if(($in.name.ToString().ToLower() -eq "vstestversion") -and ($in.value.ToString().ToLower() -ne "latest"))
+            #         {
+            #             Write-Host "`nVsTest settings needs attention! Should be vsTestVersion = latest" -ForegroundColor Yellow      
+            #             Write-Host "Current values are: "
+            #             Write-Host "Displayname : " $in.name
+            #             Write-Host "Value       : " $in.value.ToString()
+            #             $in.value = "'latest'"
+            #             Write-Host "VsTest version will be updated to 'latest'" -ForegroundColor Cyan
+            #         }
+            #     }
 
-                foreach($tsk in $bld.task)
-                {
-                    if(($tsk.name.ToString().ToLower() -eq "versionspec") -and ($tsk.value.ToString().ToLower() -ne "2.*"))
-                    {
-                        Write-Host "`nVsTest settings needs attention! Should be VersionSpec 2.*" -ForegroundColor Yellow      
-                        Write-Host "Current values are: "
-                        Write-Host "Displayname  : " $tsk.name
-                        Write-Host "Value        : " $tsk.value.ToString()
-                        $tsk.value = "'2.*'"
-                        Write-Host "versionSpec will be updated to '2.*'" -ForegroundColor Cyan
-                    }
-                }
-            }
+            #     foreach($tsk in $bld.task)
+            #     {
+            #         if(($tsk.name.ToString().ToLower() -eq "versionspec") -and ($tsk.value.ToString().ToLower() -ne "2.*"))
+            #         {
+            #             Write-Host "`nVsTest settings needs attention! Should be VersionSpec 2.*" -ForegroundColor Yellow      
+            #             Write-Host "Current values are: "
+            #             Write-Host "Displayname  : " $tsk.name
+            #             Write-Host "Value        : " $tsk.value.ToString()
+            #             $tsk.value = "'2.*'"
+            #             Write-Host "versionSpec will be updated to '2.*'" -ForegroundColor Cyan
+            #         }
+            #     }
+            # }
 
             # NPM - snoop
-            if($bld.displayName.ToString().ToLower().Contains("npm"))
-            {
-                foreach($in in $bld.inputs)
-                {
-                    if(($in.name.ToString().ToLower() -eq "command") -and ($in.value.ToString().ToLower() -eq "run extract"))
-                    {
-                        Write-Host "`nNpm settings needs attention! Please investigate." -ForegroundColor Yellow      
-                        Write-Host "Current values are: "
-                        Write-Host "Command     : " $in.name.ToString()
-                        Write-Host "Value       : " $in.value.ToString()
-                        Write-Host "Value NOT updated!" -ForegroundColor Cyan
-                    }
-                }
-            }
+            # if($bld.displayName.ToString().ToLower().Contains("npm"))
+            # {
+            #     foreach($in in $bld.inputs)
+            #     {
+            #         if(($in.name.ToString().ToLower() -eq "command") -and ($in.value.ToString().ToLower() -eq "run extract"))
+            #         {
+            #             Write-Host "`nNpm settings needs attention! Please investigate." -ForegroundColor Yellow      
+            #             Write-Host "Current values are: "
+            #             Write-Host "Command     : " $in.name.ToString()
+            #             Write-Host "Value       : " $in.value.ToString()
+            #             Write-Host "Value NOT updated!" -ForegroundColor Cyan
+            #         }
+            #     }
+            # }
+            # # End NPM - snoop
         }
         
         #     #Here follows the commit section...

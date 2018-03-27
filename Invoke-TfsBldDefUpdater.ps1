@@ -3,14 +3,9 @@ function Invoke-TfsBldDefUpdater
 {
         <#
         .SYNOPSIS
-        As part of certain release activities, it is nessasary to retrieve a set of Tfs work items.
-        This function will retrieve the set on basis of the WIQL query passed to it.
-
-        .PARAMETER WiqlQuery
-        This is the query that will determine the workitems selected and returned to the caller.
-
-        .EXAMPLE
-        Get-TfsWorkItems "SELECT System.ID, System.Title from workitems"
+        Script to modify AssetManagement. 
+        Work that needs to be done: 
+        NuGet 
     #>
     param(
         [Parameter(Mandatory)]
@@ -38,7 +33,11 @@ function Invoke-TfsBldDefUpdater
         Write-Host "`n$TfsCollection collecion projects are:" 
         foreach($TfsProj in $TfsProjects.value)
         {
-            Invoke-TfsProjBldDefUpdate -TfsUri $TfsUri -TfsCollection $TfsCollection -TfsProject $TfsProj.name
+            if ($TfsProj.name.ToString().ToLower() -eq "assetmanagement") 
+            {
+                Write-Host "AssetManagement project found! It will now be updated..." -ForegroundColor Yellow
+                Invoke-TfsProjBldDefUpdate -TfsUri $TfsUri -TfsCollection $TfsCollection -TfsProject $TfsProj.name
+            }
         }
     }
 }
@@ -68,11 +67,9 @@ function Invoke-TfsProjBldDefUpdate
         foreach($TfsProjBldDef in $TfsProjBldDefs.value)
         {
             $TfsBldDefUrl = "$TfsUri/$TfsCollection/$Tfsproject/_apis/build/definitions/$($TfsProjBldDef.ID)?api-version=2.0"
-            Write-Host $TfsBldDefUrl
             Update-BuildDef -buildDefUrl $TfsBldDefUrl -TfsCollection $TfsCollection -TfsProject $TfsProj.name -buildDefName $TfsProjBldDef.Name
         }
     }
 }
 
 Invoke-TfsBldDefUpdater -TfsUri "http://papptfs17.binckbank.nv:8080/tfs" -TfsCollection 'Binck'
-#Invoke-TfsBldDefUpdater -TfsUri "http://t800:8080/tfs" -TfsCollection 'DefaultCollection'
