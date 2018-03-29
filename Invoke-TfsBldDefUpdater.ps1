@@ -3,13 +3,16 @@ function Invoke-TfsBldDefUpdater
 {
         <#
         .SYNOPSIS
-        This version will traget the Topline BuildDefinitions as the solotion is known here.
+        Work required here is:
+         - NuGet
+         - Unit Tests runner
+          -- ATTENTION! Build definition Sonar.Binck.Library requires the following change to the unit test filter AFTER this script was run:
+          
+          **\*unittests*.dll
+          !**/obj/**
+          !**/*dataaccess*.dll
 
-        .PARAMETER WiqlQuery
-        This is the query that will determine the workitems selected and returned to the caller.
-
-        .EXAMPLE
-        Get-TfsWorkItems "SELECT System.ID, System.Title from workitems"
+          
     #>
     param(
         [Parameter(Mandatory)]
