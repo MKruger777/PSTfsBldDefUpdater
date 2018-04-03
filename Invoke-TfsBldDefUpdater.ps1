@@ -4,13 +4,18 @@ function Invoke-TfsBldDefUpdater
         <#
         .SYNOPSIS
         Work required here is:
-         - NuGet
-         - Unit Tests runner
+        1 - NuGet
+        2 - Unit Tests runner
           -- ATTENTION! Build definition Sonar.Binck.Library requires the following change to the unit test filter AFTER this script was run:
           
           **\*unittests*.dll
           !**/obj/**
           !**/*dataaccess*.dll
+
+        3 - BuildDef : Sonar.Binck.Diversen.Productie
+            Display name = NuGet restore
+            Path to solution = $(ProjectFolder)**\*.sln
+
 
           
     #>
