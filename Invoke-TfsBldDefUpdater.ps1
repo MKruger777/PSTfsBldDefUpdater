@@ -5,7 +5,7 @@ function Invoke-TfsBldDefUpdater
         .SYNOPSIS
         Script to modify AssetManagement. 
         Work that needs to be done: 
-        NuGet 
+         - NuGet 
     #>
     param(
         [Parameter(Mandatory)]
