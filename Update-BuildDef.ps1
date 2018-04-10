@@ -195,10 +195,10 @@ function Update-BuildDef
             }
         }
         
-        #     #Here follows the commit section...
+        # ##Here follows the commit section...
         # $serialized = [Newtonsoft.Json.JsonConvert]::SerializeObject($buildDefinition)
         # $postData = [System.Text.Encoding]::UTF8.GetBytes($serialized)
-        # The TFS2015 REST endpoint requires an api-version header, otherwise it refuses to work properly.
+        # ##The TFS2015 REST endpoint requires an api-version header, otherwise it refuses to work properly.
         # $headers = @{ "Accept" = "api-version=2.3-preview.2" }
         # $response = Invoke-WebRequest -UseDefaultCredentials -Uri $buildDefUrl -Headers $headers `
         #             -Method Put -Body $postData -ContentType "application/json"
