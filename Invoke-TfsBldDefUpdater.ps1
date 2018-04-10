@@ -5,7 +5,8 @@ function Invoke-TfsBldDefUpdater
         .SYNOPSIS
         Script to modify ToplineGit.
         Work that needs to be done:
-        NuGet
+         - NuGet
+         - NPM snoop
 
         .PARAMETER TfsUri
         Tfs Uri - looks like this "http://papptfs17.binckbank.nv:8080/tfs"
