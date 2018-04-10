@@ -5,7 +5,8 @@ function Invoke-TfsBldDefUpdater
         .SYNOPSIS
         Script to modify FintegratorPS.
         Work that needs to be done:
-        NuGet
+         - NuGet
+         - Snoop for NPM tasks
 
         .PARAMETER TfsUri
         Tfs Uri - looks like this "http://papptfs17.binckbank.nv:8080/tfs"
